@@ -1,39 +1,39 @@
 Data = {
-    'initial_VS': -72,
-    'initial_VD': -75,
-    'initial_w' : 0.9,
-    'initial_n' : 0.9,
+    'initial_VS': -50,  # mV
+    'initial_VD': -90,  # mV
+    'initial_w' : 0.09,
+    'initial_n' : 0.09,
     'initial_h' : 0.9,
-    'initial_c' : 0.9,
-    'initial_q' : 0.9,
-    'initial_Ca': 0.1,
+    'initial_c' : 0.09,
+    'initial_q' : 0.09,
+    'initial_Ca': 10.0,  # uM
 
-    'Cm'   : 2.0,
+    'IS': 20,           # uA/cm^2
+    'ID': 0,            # uA/cm^2
+
+    'Cm'   : 2.0,       # uF/cm^2
     'p'    : 0.5,
-    'gc'   : 1,
-    'gNa'  : 20,
-    'gK'   : 20,
-    'gSL'  : 2,
-    'gCa'  : 40,
-    'gKC'  : 15,
-    'gKAHP': 0.8,
-    'gDL'  : 2,
+    'gc'   : 1,         # mS/cm^2
+    'gNa'  : 20,        # mS/cm^2
+    'gK'   : 20,        # mS/cm^2
+    'gSL'  : 2,         # mS/cm^2
+    'gCa'  : 40,        # varying, mS/cm^2
+    'gKC'  : 15,        # mS/cm^2
+    'gKAHP': 0.8,       # mS/cm^2
+    'gDL'  : 2,         # mS/cm^2
 
-    'betam' : -1.2,
-    'gammam': 18,
-    'phiw'  : 0.15,
-    'betaw' : 0,
-    'gammaw': 10,
+    'betam' : -1.2,     # mV
+    'gammam': 18,       # mV
+    'phiw'  : 0.15,     
+    'betaw' : 0,        # mV
+    'gammaw': 10,       # mV
 
-    'ENa': 50,
-    'EK' : -100,
-    'ESL': -70,
-    'ECa': 120,
-    'EDL': -70,
+    'ENa': 50,          # mV
+    'EK' : -100,        # mV
+    'ESL': -70,         # mV
+    'ECa': 120,         # mV
+    'EDL': -70,         # mV
 
-    'taun': 15,
-    'tauh': 80,
-
-    'IS': 40,
-    'ID': 0
+    'taun': 15,         # ms
+    'tauh': 80          # ms
 }
