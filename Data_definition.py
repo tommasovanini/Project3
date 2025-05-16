@@ -1,15 +1,15 @@
 Data = {
-    'initial_VS': -50,  # mV
-    'initial_VD': -90,  # mV
+    'initial_VS': -70,  # mV
+    'initial_VD': -50,  # mV
     'initial_w' : 0.09,
     'initial_n' : 0.09,
-    'initial_h' : 0.9,
+    'initial_h' : 0.1,
     'initial_c' : 0.09,
     'initial_q' : 0.09,
-    'initial_Ca': 10.0,  # uM
+    'initial_Ca': 0.0,  # uM
 
-    'IS': 20,           # uA/cm^2
-    'ID': 0,            # uA/cm^2
+    'IS': 0,           # uA/cm^2
+    'ID': 70,            # uA/cm^2
 
     'Cm'   : 2.0,       # uF/cm^2
     'p'    : 0.5,

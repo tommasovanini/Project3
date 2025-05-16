@@ -1,9 +1,11 @@
 import numpy as np
 
 def computeCurrents(t, y, Data):
-    # Variables order:
-    # VS, VD, w, n, h, c, q, [Ca]
-    y0, y1, y2, y3, y4, y5, y6, y7 = y
+    # t is a float
+    # y.shape == (8,)
+    # Data is a dictionary with all the parameters
+
+    VS, VD, w, n, h, c, q, Ca = y
 
     gc    = Data['gc'   ]
     gNa   = Data['gNa'  ]
@@ -23,26 +25,40 @@ def computeCurrents(t, y, Data):
     betam  = Data['betam' ]
     gammam = Data['gammam']
 
-    minf = 0.5*(1 + np.tanh((y0 - betam)/gammam))
-    csiCa = min(y7/250, 1)
+    minf = 0.5*(1 + np.tanh((VS - betam)/gammam))
+    csiCa = (0.004*Ca + 1 - np.abs(0.004*Ca - 1))*0.5       # equivalent to min(Ca/250, 1)
 
 
     IS    = Data['IS']
     ID    = Data['ID']
-    IDS   = gc    * (y1-y0)
-    INa   = gNa   * minf * (y0-ENa)
-    IK    = gK    * y2 * (y0-EK)
-    ISL   = gSL   * (y0-ESL)
-    ICa   = gCa   * y3 * y4 * (y1-ECa)
-    IKC   = gKC   * y5 * csiCa * (y1-EK)
-    IKAHP = gKAHP * y6 * (y1-EK)
-    IDL   = gDL   * (y1-EDL)
+    IDS   = gc    * (VD-VS)
+    INa   = gNa   * minf * (VS-ENa)
+    IK    = gK    * w * (VS-EK)
+    ISL   = gSL   * (VS-ESL)
+    ICa   = gCa   * n * h * (VD-ECa)
+    IKC   = gKC   * c * csiCa * (VD-EK)
+    IKAHP = gKAHP * q * (VD-EK)
+    IDL   = gDL   * (VD-EDL)
 
     return IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL
 
 
-def dydt(t, y, Data):
-    y0, y1, y2, y3, y4, y5, y6, y7 = y
+def computeCurrents_vectorized(t, y, Data):
+    # t.shape == (n,)
+    # y.shape == (8,n)
+    # Data is a dictionary with all the parameters
+
+    IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL = np.array([computeCurrents(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
+
+    return IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL
+
+
+def dydt(t, y, Data, return_full=False):
+    # t is a float
+    # y.shape == (8,)
+    # Data is a dictionary with all the parameters
+    
+    VS, VD, w, n, h, c, q, Ca = y
 
     Cm = Data['Cm']
     p  = Data['p']
@@ -50,53 +66,81 @@ def dydt(t, y, Data):
     phiw   = Data['phiw'  ]
     betaw  = Data['betaw' ]
     gammaw = Data['gammaw']
-    tauw   = 1/np.cosh((y0 - betaw)/gammaw*0.5)
+    tauw   = 1/np.cosh((VS - betaw)/gammaw*0.5)
 
     taun = Data['taun']
     tauh = Data['tauh']
 
-    winf = 0.5*(1 + np.tanh((y0 - betaw)/gammaw))
-    # To avoid overflow in exp
-    if(y1 >= 0):
-        hinf = 0
-        ninf = 1/(1 + np.exp(-(y1 +  9)/0.5))
-    elif(y1 <= -20):
-        hinf = 1/(1 + np.exp( (y1 + 21)/0.5))
-        ninf = 0
-    else:
-        hinf = 1/(1 + np.exp( (y1 + 21)/0.5))
-        ninf = 1/(1 + np.exp(-(y1 +  9)/0.5))
+    winf = 0.5*(1 + np.tanh((VS - betaw)/gammaw))
+    hinf = 1/(1 + np.exp( (VD + 21)*2))
+    ninf = 1/(1 + np.exp(-(VD +  9)*2))
 
-    if y1 <= 50:
-        alphac = (np.exp((y1 - 10)/11 - (y1 - 6.5)/27))/18.975
-        betac = 2*np.exp((6.5 - y1)/27) - alphac
+    if VD <= 50:
+        alphac = (np.exp((VD - 10)/11 - (VD - 6.5)/27))/18.975
+        betac  = 2*np.exp((6.5 - VD)/27) - alphac
     else:
-        alphac = 2*np.exp((6.5 - y1)/27)
-        betac = 0
+        alphac = 2*np.exp((6.5 - VD)/27)
+        betac  = 0
 
-    alphaq = min(0.00002*y7, 0.01)
+    alphaq = (0.00002*Ca + 0.01 - np.abs(0.00002*Ca - 0.01))*0.5      # equivalent to min(0.00002*Ca, 0.01)
     betaq  = 0.001
 
     IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL = computeCurrents(t, y, Data)
 
-    # Print the currents every 10 timesteps, up to 10ms
-    if t <= 10 and (int(100*t))%10 == 0:
-        print("{:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}".format(IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL))
+    # # Print the currents every 10 timesteps, up to 10ms
+    # if t <= 10 and (int(100*t))%10 == 0:
+    #     print("Currents: {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}".format(IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL))
 
-    # Variables order: VS, VD, w, n, h, c, q, [Ca]
-    dy0 = 1.0/Cm * (IS/p     + IDS/p     - INa - IK  - ISL)
-    dy1 = 1.0/Cm * (ID/(1-p) - IDS/(1-p) - ICa - IKC - IKAHP - IDL)
-    dy2 = phiw * (winf-y2)/tauw
-    dy3 = (ninf-y3)/taun
-    dy4 = (hinf-y4)/tauh
-    dy5 = alphac*(1-y5) - betac*y5
-    dy6 = alphaq*(1-y6) - betaq*y6
-    dy7 = -0.13*ICa - 0.075*y7
+    dVSdt = 1.0/Cm * (IS/p     + IDS/p     - INa - IK  - ISL)
+    dVDdt = 1.0/Cm * (ID/(1-p) - IDS/(1-p) - ICa - IKC - IKAHP - IDL)
+    dwdt  = phiw * (winf-w)/tauw
+    dndt  = (ninf-n)/taun
+    dhdt  = (hinf-h)/tauh
+    dcdt  = alphac*(1-c) - betac*c
+    dqdt  = alphaq*(1-q) - betaq*q
+    dCadt = -0.13*ICa - 0.075*Ca
 
-    # print(IS/p, IDS/p, -INa, -IK, -ISL)
-    # print(ID/(1-p), IDS/(1-p), -ICa, -IKC, -IKAHP, -IDL)
+    if not return_full:
+        return [dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt]
+    else:
+        pieces = []
+        pieces.append([1.0/Cm*IS/p, 1.0/Cm*IDS/p, -1.0/Cm*INa, -1.0/Cm*IK, -1.0/Cm*ISL])
+        pieces.append([1.0/Cm*ID/(1-p), -1.0/Cm*IDS/(1-p), -1.0/Cm*ICa, -1.0/Cm*IKC, -1.0/Cm*IKAHP, -1.0/Cm*IDL])
+        pieces.append([winf, tauw])
+        pieces.append([ninf])
+        pieces.append([hinf])
+        pieces.append([alphac, betac])
+        pieces.append([alphaq, betaq])
+        pieces.append([-0.13*ICa, -0.075*Ca])
+        return [dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt, pieces]
 
-    # print("dy0:", dy0, "dy1:", dy1, "dy2:", dy2, "\ndy3:", dy3, "dy4:", dy4, "dy5:", dy5, "\ndy6:", dy6, "dy7:", dy7)
-    # print("\n")
 
-    return [dy0, dy1, dy2, dy3, dy4, dy5, dy6, dy7]
+def dydt_vectorized(t, y, Data, return_full=False):
+    # t.shape == (n,)
+    # y.shape == (8,n)
+    # Data is a dictionary with all the parameters
+
+    if not return_full:
+        dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt = \
+            np.array([dydt(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
+        return dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt
+
+    else:
+        dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt = np.zeros((8, t.shape[0]))
+        pieces = []
+        pieces.append(np.zeros((5, t.shape[0])))
+        pieces.append(np.zeros((6, t.shape[0])))
+        pieces.append(np.zeros((2, t.shape[0])))
+        pieces.append(np.zeros((1, t.shape[0])))
+        pieces.append(np.zeros((1, t.shape[0])))
+        pieces.append(np.zeros((2, t.shape[0])))
+        pieces.append(np.zeros((2, t.shape[0])))
+        pieces.append(np.zeros((2, t.shape[0])))
+
+        for i in range(t.shape[0]):
+            dVSdt[i], dVDdt[i], dwdt[i], dndt[i], dhdt[i], dcdt[i], dqdt[i], dCadt[i], pieces_i = \
+                dydt(t[i], y[:, i], Data, return_full=True)
+            for j in range(len(pieces)):
+                pieces[j][:, i] = pieces_i[j]
+
+        return dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt, pieces
