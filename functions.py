@@ -87,10 +87,6 @@ def dydt(t, y, Data, return_full=False):
 
     IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL = computeCurrents(t, y, Data)
 
-    # # Print the currents every 10 timesteps, up to 10ms
-    # if t <= 10 and (int(100*t))%10 == 0:
-    #     print("Currents: {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}, {:.3f}".format(IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL))
-
     dVSdt = 1.0/Cm * (IS/p     + IDS/p     - INa - IK  - ISL)
     dVDdt = 1.0/Cm * (ID/(1-p) - IDS/(1-p) - ICa - IKC - IKAHP - IDL)
     dwdt  = phiw * (winf-w)/tauw
@@ -107,8 +103,8 @@ def dydt(t, y, Data, return_full=False):
         pieces.append([1.0/Cm*IS/p, 1.0/Cm*IDS/p, -1.0/Cm*INa, -1.0/Cm*IK, -1.0/Cm*ISL])
         pieces.append([1.0/Cm*ID/(1-p), -1.0/Cm*IDS/(1-p), -1.0/Cm*ICa, -1.0/Cm*IKC, -1.0/Cm*IKAHP, -1.0/Cm*IDL])
         pieces.append([winf, tauw])
-        pieces.append([ninf])
-        pieces.append([hinf])
+        pieces.append([(ninf-n)/taun])
+        pieces.append([(hinf-h)/tauh])
         pieces.append([alphac, betac])
         pieces.append([alphaq, betaq])
         pieces.append([-0.13*ICa, -0.075*Ca])
