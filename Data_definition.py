@@ -1,15 +1,15 @@
 Data = {
     'initial_VS': -70,  # mV
-    'initial_VD': -60,  # mV
+    'initial_VD': -40,  # mV
     'initial_w' : 0.09,
     'initial_n' : 0.09,
-    'initial_h' : 0.1,
+    'initial_h' : 0.5,
     'initial_c' : 0.09,
     'initial_q' : 0.09,
     'initial_Ca': 0.0,  # uM
 
-    'IS': 0,           # uA/cm^2
-    'ID': 70,            # uA/cm^2
+    'IS': 0,            # uA/cm^2
+    'ID': 75,           # uA/cm^2
 
     'Cm'   : 2.0,       # uF/cm^2
     'p'    : 0.5,
@@ -17,7 +17,7 @@ Data = {
     'gNa'  : 20,        # mS/cm^2
     'gK'   : 20,        # mS/cm^2
     'gSL'  : 2,         # mS/cm^2
-    'gCa'  : 30,        # variable, mS/cm^2
+    'gCa'  : 40,        # variable, mS/cm^2
     'gKC'  : 15,        # mS/cm^2
     'gKAHP': 0.8,       # mS/cm^2
     'gDL'  : 2,         # mS/cm^2
@@ -34,6 +34,6 @@ Data = {
     'ECa': 120,         # mV
     'EDL': -70,         # mV
 
-    'taun': 15,         # ms    # changes amplitude of ICa oscillations
-    'tauh': 80          # ms    # changes duration of ICa negative curvature, up to a certain value
+    'taun': 100,         # ms    # changes amplitude of ICa oscillations
+    'tauh': 100          # ms    # changes duration of ICa negative curvature, up to a certain value
 }
