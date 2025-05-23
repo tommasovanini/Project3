@@ -73,7 +73,7 @@ def computeCurrents_vectorized(t, y, Data):
               IS_2, ID_2, IDS_2, INa_2, IK_2, ISL_2, ICa_2, IKC_2, IKAHP_2, IDL_2
 
 
-def dydt(t, y, Data, return_full=False):
+def dydt(t, y, Data):
     # t is a float
     # y.shape == (16,)
     # Data is a dictionary with all the parameters
@@ -123,14 +123,8 @@ def dydt(t, y, Data, return_full=False):
         IS_2, ID_2, IDS_2, INa_2, IK_2, ISL_2, ICa_2, IKC_2, IKAHP_2, IDL_2 = \
             computeCurrents(t, y, Data)
 
-    # gCa_1 = Data['gCa_1']
-    # I12 = gCa_1 * VD_1
-    
-    # dx = Data['dx']
-    # I21 = 1/dx * VD_2
-    
-    I12 = 5 * VD_1
-    I21 = 3 * VD_2
+    I12 = Data['g_12'] * (VD_1-Data['V_12'])
+    I21 = Data['g_21'] * (VD_2-Data['V_21'])
 
     dVSdt_1 = 1.0/Cm * (IS_1/p     + IDS_1/p     - INa_1 - IK_1  - ISL_1   - I21)
     dVDdt_1 = 1.0/Cm * (ID_1/(1-p) - IDS_1/(1-p) - ICa_1 - IKC_1 - IKAHP_1 - IDL_1)
@@ -150,50 +144,17 @@ def dydt(t, y, Data, return_full=False):
     dqdt_2  = alphaq_2*(1-q_2) - betaq_2*q_2
     dCadt_2 = -0.13*ICa_2 - 0.075*Ca_2
 
-    if not return_full:
-        return [dVSdt_1, dVDdt_1, dwdt_1, dndt_1, dhdt_1, dcdt_1, dqdt_1, dCadt_1,
-                dVSdt_2, dVDdt_2, dwdt_2, dndt_2, dhdt_2, dcdt_2, dqdt_2, dCadt_2]
-    # else:
-    #     pieces = []
-    #     pieces.append([1.0/Cm*IS/p, 1.0/Cm*IDS/p, -1.0/Cm*INa, -1.0/Cm*IK, -1.0/Cm*ISL])
-    #     pieces.append([1.0/Cm*ID/(1-p), -1.0/Cm*IDS/(1-p), -1.0/Cm*ICa, -1.0/Cm*IKC, -1.0/Cm*IKAHP, -1.0/Cm*IDL])
-    #     pieces.append([winf, tauw])
-    #     pieces.append([(ninf-n)/taun])
-    #     pieces.append([(hinf-h)/tauh])
-    #     pieces.append([alphac, betac])
-    #     pieces.append([alphaq, betaq])
-    #     pieces.append([-0.13*ICa, -0.075*Ca])
-    #     return [dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt, pieces]
+    return [dVSdt_1, dVDdt_1, dwdt_1, dndt_1, dhdt_1, dcdt_1, dqdt_1, dCadt_1,
+            dVSdt_2, dVDdt_2, dwdt_2, dndt_2, dhdt_2, dcdt_2, dqdt_2, dCadt_2]
 
 
-def dydt_vectorized(t, y, Data, return_full=False):
+def dydt_vectorized(t, y, Data):
     # t.shape == (n,)
     # y.shape == (16,n)
     # Data is a dictionary with all the parameters
-
-    if not return_full:
-        dVSdt_1, dVDdt_1, dwdt_1, dndt_1, dhdt_1, dcdt_1, dqdt_1, dCadt_1, \
-        dVSdt_2, dVDdt_2, dwdt_2, dndt_2, dhdt_2, dcdt_2, dqdt_2, dCadt_2 = \
-            np.array([dydt(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
-        return dVSdt_1, dVDdt_1, dwdt_1, dndt_1, dhdt_1, dcdt_1, dqdt_1, dCadt_1, \
-                dVSdt_2, dVDdt_2, dwdt_2, dndt_2, dhdt_2, dcdt_2, dqdt_2, dCadt_2
-
-    # else:
-    #     dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt = np.zeros((8, t.shape[0]))
-    #     pieces = []
-    #     pieces.append(np.zeros((5, t.shape[0])))
-    #     pieces.append(np.zeros((6, t.shape[0])))
-    #     pieces.append(np.zeros((2, t.shape[0])))
-    #     pieces.append(np.zeros((1, t.shape[0])))
-    #     pieces.append(np.zeros((1, t.shape[0])))
-    #     pieces.append(np.zeros((2, t.shape[0])))
-    #     pieces.append(np.zeros((2, t.shape[0])))
-    #     pieces.append(np.zeros((2, t.shape[0])))
-
-    #     for i in range(t.shape[0]):
-    #         dVSdt[i], dVDdt[i], dwdt[i], dndt[i], dhdt[i], dcdt[i], dqdt[i], dCadt[i], pieces_i = \
-    #             dydt(t[i], y[:, i], Data, return_full=True)
-    #         for j in range(len(pieces)):
-    #             pieces[j][:, i] = pieces_i[j]
-
-    #     return dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt, pieces
+    
+    dVSdt_1, dVDdt_1, dwdt_1, dndt_1, dhdt_1, dcdt_1, dqdt_1, dCadt_1, \
+    dVSdt_2, dVDdt_2, dwdt_2, dndt_2, dhdt_2, dcdt_2, dqdt_2, dCadt_2 = \
+        np.array([dydt(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
+    return dVSdt_1, dVDdt_1, dwdt_1, dndt_1, dhdt_1, dcdt_1, dqdt_1, dCadt_1, \
+            dVSdt_2, dVDdt_2, dwdt_2, dndt_2, dhdt_2, dcdt_2, dqdt_2, dCadt_2

@@ -23,7 +23,12 @@ Data = {
     'IS_2': 0,            # uA/cm^2
     'ID_2': 75,           # uA/cm^2
 
-    'dx': 0.1,          # cm
+    'dx': 0.1,          # distanza tra i due neuroni, cm
+    'delay': 50,        # ms
+    'g_12': 5,          # mS/cm^2
+    'g_21': 5,          # mS/cm^2
+    'V_12': 0,          # primo neurone, eccitatorio:0, inibitorio: -70, mV
+    'V_21': -70,          # secondo neurone, eccitatorio:0, inibitorio: -70, mV
 
     'Cm'   : 2.0,       # uF/cm^2
     'p'    : 0.5,
