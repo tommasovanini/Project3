@@ -125,9 +125,12 @@ def dydt(t, y, Data, return_full=False):
 
     # gCa_1 = Data['gCa_1']
     # I12 = gCa_1 * VD_1
+    
+    # dx = Data['dx']
+    # I21 = 1/dx * VD_2
+    
     I12 = 5 * VD_1
-    dx = Data['dx']
-    I21 = 1/dx * VD_2
+    I21 = 3 * VD_2
 
     dVSdt_1 = 1.0/Cm * (IS_1/p     + IDS_1/p     - INa_1 - IK_1  - ISL_1   - I21)
     dVDdt_1 = 1.0/Cm * (ID_1/(1-p) - IDS_1/(1-p) - ICa_1 - IKC_1 - IKAHP_1 - IDL_1)
