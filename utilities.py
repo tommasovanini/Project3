@@ -115,8 +115,9 @@ def plot_solutions(all_data, g_values, colors):
 
 
 
-    fig = plt.figure(figsize=(18, 10))
-    ax = fig.add_subplot(111, projection='3d')
+    fig = plt.figure(figsize=(16, 9))
+
+    ax = fig.add_subplot(121, projection='3d')
     for i, g_val in enumerate(g_values):
         ax.plot(time, all_data['VS_1'][i], all_data['w_1'][i], color=colors[i], label=f'g={g_val}')
     ax.view_init(10, 260)
@@ -125,13 +126,8 @@ def plot_solutions(all_data, g_values, colors):
     ax.set_zlabel('$w_1$')
     plt.title("t vs $V_{S, 1}$ vs $w_1$")
     plt.legend(bbox_to_anchor=(1.01, 1))
-    plt.grid()
-    plt.show()
 
-
-
-    fig = plt.figure(figsize=(18, 10))
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(122, projection='3d')
     for i, g_val in enumerate(g_values):
         ax.plot(time, all_data['VS_2'][i], all_data['w_2'][i], color=colors[i], label=f'g={g_val}')
     ax.view_init(10, 260)
@@ -140,5 +136,29 @@ def plot_solutions(all_data, g_values, colors):
     ax.set_zlabel('$w_2$')
     plt.title("t vs $V_{S, 2}$ vs $w_2$")
     plt.legend(bbox_to_anchor=(1.01, 1))
-    plt.grid()
+    plt.show()
+
+
+
+    fig = plt.figure(figsize=(16, 9))
+
+    ax = fig.add_subplot(121, projection='3d')
+    for i, g_val in enumerate(g_values):
+        ax.plot(all_data['ICa_1'][i], all_data['VS_1'][i], all_data['VD_1'][i], color=colors[i], label=f'g={g_val}')
+    ax.view_init(10, 260)
+    ax.set_xlabel('$I_{Ca, 1}$ ($\mu A/cm^2$)')
+    ax.set_ylabel('$V_{S, 1}$ (mV)')
+    ax.set_zlabel('$V_{D, 1}$ (mV)')
+    plt.title("$I_{Ca, 1}$ vs $V_{S, 1}$ vs $V_{D, 1}$")
+    plt.legend(bbox_to_anchor=(1.01, 1))
+
+    ax = fig.add_subplot(122, projection='3d')
+    for i, g_val in enumerate(g_values):
+        ax.plot(all_data['ICa_2'][i], all_data['VS_2'][i], all_data['VD_2'][i], color=colors[i], label=f'g={g_val}')
+    ax.view_init(10, 260)
+    ax.set_xlabel('$I_{Ca, 2}$ ($\mu A/cm^2$)')
+    ax.set_ylabel('$V_{S, 2}$ (mV)')
+    ax.set_zlabel('$V_{D, 2}$ (mV)')
+    plt.title("$I_{Ca, 2}$ vs $V_{S, 2}$ vs $V_{D, 2}$")
+    plt.legend(bbox_to_anchor=(1.01, 1))
     plt.show()
