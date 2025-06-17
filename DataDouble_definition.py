@@ -23,37 +23,34 @@ Data = {
     'IS_2': 0,            # uA/cm^2
     'ID_2': 75,           # uA/cm^2
 
-    'dx'   : 0.1,       # distanza tra i due neuroni, cm
-    'delay': 50,        # ms
-    'g_12' : 5,         # mS/cm^2
-    'g_21' : 5,         # mS/cm^2
-    'V_12' : 0,         # primo neurone, eccitatorio:0, inibitorio: -70, mV
-    'V_21' : -70,       # secondo neurone, eccitatorio:0, inibitorio: -70, mV
+    'g'    : 5,           # mS/cm^2
+    'V_1'  : 0,           # first neuron,  excitatory:0 mV, inhibitory: -70 mV
+    'V_2'  : -70,         # second neuron, excitatory:0 mV, inhibitory: -70 mV
 
-    'Cm'   : 2.0,       # uF/cm^2
-    'p'    : 0.5,
-    'gc'   : 1,         # mS/cm^2
-    'gNa'  : 20,        # mS/cm^2
-    'gK'   : 20,        # mS/cm^2
-    'gSL'  : 2,         # mS/cm^2
-    'gCa_1': 40,        # variable, mS/cm^2
-    'gCa_2': 40,        # variable, mS/cm^2
-    'gKC'  : 15,        # mS/cm^2
-    'gKAHP': 0.8,       # mS/cm^2
-    'gDL'  : 2,         # mS/cm^2
+    'Cm'   : 2.0,         # uF/cm^2
+    'p'    : 0.5,  
+    'gc'   : 1,           # mS/cm^2
+    'gNa'  : 20,          # mS/cm^2
+    'gK'   : 20,          # mS/cm^2
+    'gSL'  : 2,           # mS/cm^2
+    'gCa_1': 40,          # variable, mS/cm^2
+    'gCa_2': 40,          # variable, mS/cm^2
+    'gKC'  : 15,          # mS/cm^2
+    'gKAHP': 0.8,         # mS/cm^2
+    'gDL'  : 2,           # mS/cm^2
 
-    'betam' : -1.2,     # mV
-    'gammam': 18,       # mV
-    'phiw'  : 0.15,     
-    'betaw' : 0,        # mV
-    'gammaw': 10,       # mV
+    'betam' : -1.2,       # mV
+    'gammam': 18,         # mV
+    'phiw'  : 0.15,       
+    'betaw' : 0,          # mV
+    'gammaw': 10,         # mV
 
-    'ENa': 50,          # mV
-    'EK' : -100,        # mV
-    'ESL': -70,         # mV
-    'ECa': 120,         # mV
-    'EDL': -70,         # mV
+    'ENa': 50,            # mV
+    'EK' : -100,          # mV
+    'ESL': -70,           # mV
+    'ECa': 120,           # mV
+    'EDL': -70,           # mV
 
-    'taun': 100,         # ms
-    'tauh': 100          # ms
+    'taun': 100,          # ms
+    'tauh': 100           # ms
 }

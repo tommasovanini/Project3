@@ -5,8 +5,10 @@ def computeCurrents(t, y, Data):
     # y.shape == (8,)
     # Data is a dictionary with all the parameters
 
+    # Unpack the state variables
     VS, VD, w, n, h, c, q, Ca = y
 
+    # Definition of conductances and Nerst potentials
     gc    = Data['gc'   ]
     gNa   = Data['gNa'  ]
     gK    = Data['gK'   ]
@@ -21,7 +23,8 @@ def computeCurrents(t, y, Data):
     ESL = Data['ESL']
     ECa = Data['ECa']
     EDL = Data['EDL']
-    
+
+    # Parameters for the gating variables
     betam  = Data['betam' ]
     gammam = Data['gammam']
 
@@ -48,21 +51,24 @@ def computeCurrents_vectorized(t, y, Data):
     # y.shape == (8,n)
     # Data is a dictionary with all the parameters
 
-    IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL = np.array([computeCurrents(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
+    IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL = \
+        np.array([computeCurrents(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
 
     return IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL
 
 
-def dydt(t, y, Data, return_full=False):
+def dydt(t, y, Data):
     # t is a float
     # y.shape == (8,)
     # Data is a dictionary with all the parameters
     
+    # Unpack the state variables
     VS, VD, w, n, h, c, q, Ca = y
 
     Cm = Data['Cm']
     p  = Data['p']
 
+    # Parameters for the gating variables
     phiw   = Data['phiw'  ]
     betaw  = Data['betaw' ]
     gammaw = Data['gammaw']
@@ -85,8 +91,10 @@ def dydt(t, y, Data, return_full=False):
     alphaq = (0.00002*Ca + 0.01 - np.abs(0.00002*Ca - 0.01))*0.5      # equivalent to min(0.00002*Ca, 0.01)
     betaq  = 0.001
 
+    # Compute the currents
     IS, ID, IDS, INa, IK, ISL, ICa, IKC, IKAHP, IDL = computeCurrents(t, y, Data)
 
+    
     dVSdt = 1.0/Cm * (IS/p     + IDS/p     - INa - IK  - ISL)
     dVDdt = 1.0/Cm * (ID/(1-p) - IDS/(1-p) - ICa - IKC - IKAHP - IDL)
     dwdt  = phiw * (winf-w)/tauw
@@ -96,47 +104,15 @@ def dydt(t, y, Data, return_full=False):
     dqdt  = alphaq*(1-q) - betaq*q
     dCadt = -0.13*ICa - 0.075*Ca
 
-    if not return_full:
-        return [dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt]
-    else:
-        pieces = []
-        pieces.append([1.0/Cm*IS/p, 1.0/Cm*IDS/p, -1.0/Cm*INa, -1.0/Cm*IK, -1.0/Cm*ISL])
-        pieces.append([1.0/Cm*ID/(1-p), -1.0/Cm*IDS/(1-p), -1.0/Cm*ICa, -1.0/Cm*IKC, -1.0/Cm*IKAHP, -1.0/Cm*IDL])
-        pieces.append([winf, tauw])
-        pieces.append([(ninf-n)/taun])
-        pieces.append([(hinf-h)/tauh])
-        pieces.append([alphac, betac])
-        pieces.append([alphaq, betaq])
-        pieces.append([-0.13*ICa, -0.075*Ca])
-        return [dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt, pieces]
+    return [dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt]
 
 
-def dydt_vectorized(t, y, Data, return_full=False):
+def dydt_vectorized(t, y, Data):
     # t.shape == (n,)
     # y.shape == (8,n)
     # Data is a dictionary with all the parameters
 
-    if not return_full:
-        dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt = \
-            np.array([dydt(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
-        return dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt
+    dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt = \
+        np.array([dydt(t[i], y[:, i], Data) for i in range(t.shape[0])]).T
+    return dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt
 
-    else:
-        dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt = np.zeros((8, t.shape[0]))
-        pieces = []
-        pieces.append(np.zeros((5, t.shape[0])))
-        pieces.append(np.zeros((6, t.shape[0])))
-        pieces.append(np.zeros((2, t.shape[0])))
-        pieces.append(np.zeros((1, t.shape[0])))
-        pieces.append(np.zeros((1, t.shape[0])))
-        pieces.append(np.zeros((2, t.shape[0])))
-        pieces.append(np.zeros((2, t.shape[0])))
-        pieces.append(np.zeros((2, t.shape[0])))
-
-        for i in range(t.shape[0]):
-            dVSdt[i], dVDdt[i], dwdt[i], dndt[i], dhdt[i], dcdt[i], dqdt[i], dCadt[i], pieces_i = \
-                dydt(t[i], y[:, i], Data, return_full=True)
-            for j in range(len(pieces)):
-                pieces[j][:, i] = pieces_i[j]
-
-        return dVSdt, dVDdt, dwdt, dndt, dhdt, dcdt, dqdt, dCadt, pieces

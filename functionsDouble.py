@@ -5,9 +5,11 @@ def computeCurrents(t, y, Data):
     # y.shape == (16,)
     # Data is a dictionary with all the parameters
 
+    # Unpack the state variables
     VS_1, VD_1, w_1, n_1, h_1, c_1, q_1, Ca_1 = y[:8]
     VS_2, VD_2, w_2, n_2, h_2, c_2, q_2, Ca_2 = y[8:]
 
+    # Definition of conductances and Nerst potentials
     gc      = Data['gc'   ]
     gNa     = Data['gNa'  ]
     gK      = Data['gK'   ]
@@ -24,6 +26,7 @@ def computeCurrents(t, y, Data):
     ECa = Data['ECa']
     EDL = Data['EDL']
     
+    # Parameters for the gating variables
     betam  = Data['betam' ]
     gammam = Data['gammam']
 
@@ -43,7 +46,6 @@ def computeCurrents(t, y, Data):
     IKC_1   = gKC   * c_1 * csiCa_1 * (VD_1-EK)
     IKAHP_1 = gKAHP * q_1 * (VD_1-EK)
     IDL_1   = gDL   * (VD_1-EDL)
-
     
     IS_2    = Data['IS_2']
     ID_2    = Data['ID_2']
@@ -78,12 +80,14 @@ def dydt(t, y, Data):
     # y.shape == (16,)
     # Data is a dictionary with all the parameters
     
+    # Unpack the state variables
     VS_1, VD_1, w_1, n_1, h_1, c_1, q_1, Ca_1 = y[:8]
     VS_2, VD_2, w_2, n_2, h_2, c_2, q_2, Ca_2 = y[8:]
 
     Cm = Data['Cm']
     p  = Data['p']
 
+    # Parameters for the gating variables
     phiw   = Data['phiw'  ]
     betaw  = Data['betaw' ]
     gammaw = Data['gammaw']
@@ -119,12 +123,15 @@ def dydt(t, y, Data):
     alphaq_2 = (0.00002*Ca_2 + 0.01 - np.abs(0.00002*Ca_2 - 0.01))*0.5
     betaq_2  = 0.001
 
+    # Compute the currents
     IS_1, ID_1, IDS_1, INa_1, IK_1, ISL_1, ICa_1, IKC_1, IKAHP_1, IDL_1, \
         IS_2, ID_2, IDS_2, INa_2, IK_2, ISL_2, ICa_2, IKC_2, IKAHP_2, IDL_2 = \
             computeCurrents(t, y, Data)
+    
+    # Compute the coupling currents
+    I12 = Data['g'] * (VD_1-Data['V_1'])
+    I21 = Data['g'] * (VD_2-Data['V_2'])
 
-    I12 = Data['g_12'] * (VD_1-Data['V_12'])
-    I21 = Data['g_21'] * (VD_2-Data['V_21'])
 
     dVSdt_1 = 1.0/Cm * (IS_1/p     + IDS_1/p     - INa_1 - IK_1  - ISL_1   - I21)
     dVDdt_1 = 1.0/Cm * (ID_1/(1-p) - IDS_1/(1-p) - ICa_1 - IKC_1 - IKAHP_1 - IDL_1)

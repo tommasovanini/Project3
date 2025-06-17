@@ -34,6 +34,6 @@ Data = {
     'ECa': 120,         # mV
     'EDL': -70,         # mV
 
-    'taun': 100,         # ms    # changes amplitude of ICa oscillations
-    'tauh': 100          # ms    # changes duration of ICa negative curvature, up to a certain value
+    'taun': 100,        # ms    # changes amplitude of ICa oscillations
+    'tauh': 100         # ms    # changes duration of ICa negative curvature, up to a certain value
 }
